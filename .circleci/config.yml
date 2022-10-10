@@ -41,5 +41,5 @@ workflows:
         jobs:
         - build-frontend
         - build-backend
-            require:
+            requires:
               build-frontend
