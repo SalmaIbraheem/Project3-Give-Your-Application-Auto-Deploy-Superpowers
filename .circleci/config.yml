@@ -42,4 +42,4 @@ workflows:
         - build-frontend
         - build-backend
             requires:
-              build-frontend
+              - build-frontend
