@@ -106,6 +106,9 @@ jobs:
         steps:
         - checkout
         - run:
+            name: INstall gzip and tar to handle (Error tar utility is not present in this image but it is required. Please install it to have workflow workspace capability)
+            command: sudo apt-get install -y tar gzip
+        - run:
             name: Ensure back-end infrastructure exists
             command: |
               aws cloudformation deploy \
@@ -133,20 +136,21 @@ jobs:
 workflows:
     default:
         jobs:
-        - build-frontend
+        #- build-frontend
         - build-backend
-        - test-frontend:
-            requires:
-                - build-frontend
-        - test-backend:
-            requires:
-                - build-backend
-        - scan-frontend:
-            requires:
-                - build-frontend
-        - scan-backend:
-            requires:
-                - build-backend
+        #- test-frontend:
+        #    requires:
+        #        - build-frontend
+        #- test-backend:
+        #    requires:
+        #        - build-backend
+        #- scan-frontend:
+        #    requires:
+        #        - build-frontend
+        #- scan-backend:
+        #    requires:
+        #        - build-backend
         - deploy-infrastructure:
-            requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+            requires: [build-backend]
+            #requires: [test-frontend, test-backend, scan-frontend, scan-backend]
             
