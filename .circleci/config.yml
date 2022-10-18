@@ -12,8 +12,8 @@ jobs:
             name: Destroy environments
             when: on_fail
             command: |
-              aws --region us-east-1 cloudformation delete-stack --stack-name udapeople-backend-<< parameters.Workflow_ID >>
-              aws --region us-east-1 cloudformation delete-stack --stack-name udapeople-frontend-<< parameters.Workflow_ID >>
+              aws --region us-east-1 cloudformation delete-stack --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}
+              aws --region us-east-1 cloudformation delete-stack --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}
     build-frontend:
       docker:
         - image: circleci/node:13.8.0
