@@ -16,6 +16,7 @@ commands:
             name: Destroy environments
             when: on_fail
             command: |
+              aws s3 rb s3://udapeople-872734010489 --force  
               aws --region us-east-1 cloudformation delete-stack --stack-name udapeople-backend-<<parameters.workflowID>>
               aws --region us-east-1 cloudformation delete-stack --stack-name udapeople-frontend-<<parameters.workflowID>>
 jobs:
@@ -124,7 +125,7 @@ jobs:
         - run:
             name: INstall gzip and tar to handle (Error tar utility is not present in this image but it is required. Please install it to have workflow workspace capability)
             command:  |
-              yum -y install tar gzip
+              apk add --update tar gzip
         - run:
             name: Ensure back-end infrastructure exists
             command: |
@@ -146,10 +147,35 @@ jobs:
               echo $BACKEND_PUBLIC_IP >> .circleci/ansible/inventory.txt
               cat .circleci/ansible/inventory.txt
         - persist_to_workspace:
-            root: ~/
+            root: ~/home
             paths:
             - project/.circleci/ansible/inventory.txt
         - destroy-environment    
+        
+    configure-infrastructure:
+        docker:
+          - image: python:3.7-alpine3.11
+        steps:
+          - checkout
+          - add_ssh_keys:
+              fingerprints: ["96:0c:cd:98:b6:24:e4:cd:0c:a6:81:10:e7:b8:af:f2"] 
+          - attach_workspace:
+              at: ~/home
+          - run:
+              name: Install dependencies
+              command: |
+                apk add --update tar gzip
+                pip install awscli
+                apk add --update ansible 
+                
+          - run:
+              name: Configure server
+              command: |
+                cd project/.circleci/ansible/inventory.txt
+                ansible-playbook -i inventory.txt configure-server.yml
+                
+          - destroy-environment     
+
 workflows:
     default:
         jobs:
@@ -170,4 +196,5 @@ workflows:
         - deploy-infrastructure:
             requires: [build-backend]
             #requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+        - configure-infrastructure
             
