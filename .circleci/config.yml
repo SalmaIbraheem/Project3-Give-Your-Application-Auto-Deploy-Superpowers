@@ -173,8 +173,8 @@ jobs:
               command: |
                 cd project/.circleci/ansible/inventory.txt
                 ansible-playbook -i inventory.txt configure-server.yml
-                
           - destroy-environment 
+          
     run-migrations:
         docker:
           - image: circleci/node:13.8.0
@@ -195,7 +195,7 @@ jobs:
                     # If you are using kvdb.io, generate the bucket ID "9GE4jRtKznmVKRfvdBABBe" in your local terminal first
                     curl https://kvdb.io/61h1uwDT6aP41EdnQsozhA/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
                 fi
-         - destroy-environment    
+          - destroy-environment    
 
 workflows:
     default:
