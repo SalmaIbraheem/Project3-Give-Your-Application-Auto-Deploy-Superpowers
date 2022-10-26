@@ -16,9 +16,9 @@ commands:
             name: Destroy environments
             when: on_fail
             command: |
-              aws s3 rb s3://udapeople-872734010489 --force  
+              #aws s3 rb s3://udapeople-872734010489 --force  
               aws --region us-east-1 cloudformation delete-stack --stack-name udapeople-backend-<<parameters.workflowID>>
-              aws --region us-east-1 cloudformation delete-stack --stack-name udapeople-frontend-<<parameters.workflowID>>
+              #aws --region us-east-1 cloudformation delete-stack --stack-name udapeople-frontend-<<parameters.workflowID>>
 jobs:
     build-frontend:
       docker:
