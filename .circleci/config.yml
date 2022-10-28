@@ -16,7 +16,7 @@ commands:
             name: Destroy environments
             when: on_fail
             command: |
-              #aws s3 rb s3://udapeople-826841874004 --force  
+              aws --region us-west-2 s3 rm s3://udapeople-<<parameters.Workflow_ID>> --recursive
               aws --region us-east-1 cloudformation delete-stack --stack-name udapeople-backend-<<parameters.workflowID>>
               aws --region us-east-1 cloudformation delete-stack --stack-name udapeople-frontend-<<parameters.workflowID>>
     
@@ -154,14 +154,14 @@ jobs:
               aws cloudformation deploy \
                 --template-file .circleci/files/backend.yml \
                 --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
-                --parameter-overrides ID="${CIRCLE_WORKFLOW_ID}"  
+                --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
         - run:
             name: Ensure front-end infrastructure exist
             command: |
               aws cloudformation deploy \
                 --template-file .circleci/files/frontend.yml \
                 --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
-                --parameter-overrides ID="${CIRCLE_WORKFLOW_ID}"  
+                --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
         - run:
             name: Add back-end ip to ansible inventory
             command: |
@@ -251,7 +251,7 @@ jobs:
           - run:
               name: Get backend url
               command: |
-                export BACKEND_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID}")
+                export BACKEND_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}")
                 export API_URL="http://${BACKEND_IP}:3030"
                 echo "API_URL = ${API_URL}"
                 echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
@@ -265,7 +265,7 @@ jobs:
                 tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
                 #--recursive copies all objects under a specified prefix
                 # copy build from dist on to s3 that created on forntend-infra
-                aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID}$ --recursive
+                aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7}$ --recursive
           
           - revert-migrations
           - destroy-environment   
