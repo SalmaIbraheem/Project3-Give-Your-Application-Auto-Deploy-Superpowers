@@ -234,7 +234,7 @@ jobs:
           - destroy-environment    
     deploy-frontend:
         docker:
-          - image:  amazon/aws-cli
+          - image:  python:3.7-alpine3.11
         steps:
           - checkout
           - run:
@@ -244,7 +244,7 @@ jobs:
                 apk add --update tar gzip curl
                 pip3 install awscli
                 curl -fsSL https://deb.nodesource.com/setup_14.x
-                apt-get install -y nodejs
+                apk add --update nodejs npm
                 Node --version
                 npm --version
           - run:
@@ -289,7 +289,7 @@ jobs:
                 apk add --update tar gzip curl
                 pip install awscli
                 apk add --update ansible 
-                apk add --update npm
+                apk add --update nodejs npm
 
           - run:
               name: Deploy backend
