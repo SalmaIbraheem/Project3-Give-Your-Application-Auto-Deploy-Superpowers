@@ -264,7 +264,7 @@ jobs:
                 tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
                 #--recursive copies all objects under a specified prefix
                 # copy build from dist on to s3 that created on forntend-infra
-                aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7}$ --recursive
+                aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
           
           - revert-migrations
           - destroy-environment   
