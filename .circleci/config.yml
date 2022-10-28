@@ -16,9 +16,30 @@ commands:
             name: Destroy environments
             when: on_fail
             command: |
-              #aws s3 rb s3://udapeople-872734010489 --force  
+              #aws s3 rb s3://udapeople-826841874004 --force  
               aws --region us-east-1 cloudformation delete-stack --stack-name udapeople-backend-<<parameters.workflowID>>
-              #aws --region us-east-1 cloudformation delete-stack --stack-name udapeople-frontend-<<parameters.workflowID>>
+              aws --region us-east-1 cloudformation delete-stack --stack-name udapeople-frontend-<<parameters.workflowID>>
+    
+  revert-migrations:
+    description: Revert the last migration
+    parameters:
+        workflow_id:
+            type: string      
+    steps:
+        - run:
+            name: Revert migrations
+            when: on_fail
+            command: |
+                # Your Memstash or kvdb.io GET URL code goes here
+                # Example: kvdb.io
+                SUCCESS=$(curl --insecure  https://kvdb.io/NTroCU7veN9c86NdGT818B/migration_<< parameters.workflow_id >>)
+                # Logic for reverting the database state
+                if (( $SUCCESS == 1 ));
+                then
+                    cd ~/project/backend
+                    npm install
+                    npm run migration:revert
+                fi  
 jobs:
     build-frontend:
       docker:
@@ -133,13 +154,13 @@ jobs:
                 --template-file .circleci/files/backend.yml \
                 --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
                 --parameter-overrides ID="${CIRCLE_WORKFLOW_ID}"  
-    #    - run:
-    #        name: Ensure front-end infrastructure exist
-    #        command: |
-    #          aws cloudformation deploy \
-    #            --template-file .circleci/files/frontend.yml \
-    #            --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
-    #            --parameter-overrides ID="${CIRCLE_WORKFLOW_ID}"  
+        - run:
+            name: Ensure front-end infrastructure exist
+            command: |
+              aws cloudformation deploy \
+                --template-file .circleci/files/frontend.yml \
+                --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
+                --parameter-overrides ID="${CIRCLE_WORKFLOW_ID}"  
         - run:
             name: Add back-end ip to ansible inventory
             command: |
@@ -210,13 +231,87 @@ jobs:
                     curl https://kvdb.io/NTroCU7veN9c86NdGT818B/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
                 fi
           - destroy-environment    
+    deploy-frontend:
+        docker:
+          - image: amazon/aws-cli
+        steps:
+          - checkout
+          - run:
+              name: Install dependencies
+              command: |
+                apk add --update ansible 
+                apk add --update tar gzip
+                pip install awscli
+                apt install curl
+                curl -fsSL https://deb.nodesource.com/setup_14.x
+                apt-get install -y nodejs
+                Node --version
+                npm --version
+          - run:
+              name: Get backend url
+              command: |
+                export BACKEND_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID}")
+                export API_URL="http://${BACKEND_IP}:3030"
+                echo "API_URL = ${API_URL}"
+                echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
+              cat frontend/.env
+          - run:
+              name: Deploy frontend objects
+              command: |
+              cd frontend
+              npm install
+              npm run build
+              tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
+              #--recursive copies all objects under a specified prefix
+              # copy build from dist on to s3 that created on forntend-infra
+              aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID}$ --recursive
+          
+          - revert-migrations
+          - destroy-environment   
+          
+    deploy-backend:
+        docker:
+          # Docker image here that supports Ansible
+          - image: python:3.7-alpine3.11
+        steps:
+          # Checkout code from git
+          - checkout
+          # Add ssh keys with fingerprint
+          - add_ssh_keys:
+              fingerprints: ["73:3b:70:db:85:76:0a:91:8d:3b:c3:35:81:15:63:c4"]
+          # attach workspace
+          # to have access to the previously generated inventory.txt from the deploy-infrastructure job.
+          - attach_workspace:
+              at: ~/
+          - run:
+              name: Install dependencies
+              command: |
+                apk add --update tar gzip
+                pip install awscli
+                apk add --update ansible 
 
+          - run:
+              name: Deploy backend
+              command: |
+                cd backend
+                npm i
+                npm run build
+                cd ..
+                # Zip the directory
+                tar -C backend -czvf artifact.tar.gz .
+                cd .circleci/ansible
+                echo "Contents  of the inventory.txt file is -------"
+                cat inventory.txt
+                ansible-playbook -i inventory.txt deploy-backend.yml
+          # Here's where you will add some code to rollback on failure  
+          - revert-migrations
+          - destroy-environment
+                    
 workflows:
     default:
         jobs:
-        - deploy-infrastructure
-        #- build-frontend
-        #- build-backend
+        - build-frontend
+        - build-backend
         #- test-frontend:
         #    requires:
         #        - build-frontend
@@ -229,11 +324,15 @@ workflows:
         #- scan-backend:
         #    requires:
         #        - build-backend
-        #- deploy-infrastructure
-            #requires: [test-backend]
+        - deploy-infrastructure
+            requires: [build-backend,build-frontend]
             #requires: [test-frontend, test-backend, scan-frontend, scan-backend]
         - configure-infrastructure:
             requires: [deploy-infrastructure]
         - run-migrations:
             requires: [configure-infrastructure]
+        - deploy-frontend:
+            requires: [run-migrations]
+        - deploy-backend:
+            requires: [run-migrations]
             
