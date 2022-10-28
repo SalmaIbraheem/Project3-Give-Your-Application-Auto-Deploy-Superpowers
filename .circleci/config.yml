@@ -234,7 +234,7 @@ jobs:
           - destroy-environment    
     deploy-frontend:
         docker:
-          - image: amazon/aws-cli
+          - image:  python:3.7-alpine3.11
         steps:
           - checkout
           - run:
