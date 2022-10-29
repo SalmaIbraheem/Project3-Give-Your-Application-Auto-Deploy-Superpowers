@@ -315,7 +315,7 @@ jobs:
           
     smoke-test:
         docker:
-          - image: alpine:latest
+          - image: python:3.7-alpine3.11
         steps:
           # Checkout code from git
           - run:
@@ -348,7 +348,7 @@ jobs:
                 if curl -s ${URL} | grep "Welcome"
                 then
                     # Change this to 0 after the job fails
-                  return 1
+                  return 0
                 else
                   return 1
                 fi
