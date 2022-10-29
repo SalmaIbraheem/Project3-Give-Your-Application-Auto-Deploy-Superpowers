@@ -1,3 +1,12 @@
+- name: check dist
+  become: yes
+  shell: |
+    ls
+    
+- name: change directory
+  command:  pm2 start main.js
+  args:
+    chdir: ~/project/backend/dist
 
 - name: Extract foo.tgz into /var/lib/fo
   become: yes
@@ -8,6 +17,7 @@
 - name: start app
   become: yes
   shell: |
+    ls
     npm install
     pm2 stop default
     pm2 start npm --name "udapeople-backend" start
