@@ -1,7 +1,8 @@
 
 - name: Extract foo.tgz into /var/lib/foo
+  become: yes
   ansible.builtin.unarchive:
-    src: artifact.tar.gz
+    src: files/artifact.tar.gz
     dest: .
  
 - name: start app
