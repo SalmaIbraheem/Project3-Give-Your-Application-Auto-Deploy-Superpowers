@@ -25,6 +25,13 @@
     TYPEORM_DATABASE: "{{ lookup('env', 'TYPEORM_DATABASE') }}"
 
   
-- name: Start pm2
+- name: "Set pm2 start as service"
   become: yes
-  command: pm2 start /server.js --name node-app
+  shell: |
+    env PATH=$PATH:/usr/local/bin pm2 startup -u ubuntu
+- name: check pm2 status
+  become: yes
+  shell: |
+    pm2 describe "udapeople-backend"
+  register: command_output_npm
+- debug: var=command_output_npm.stdout_lines
