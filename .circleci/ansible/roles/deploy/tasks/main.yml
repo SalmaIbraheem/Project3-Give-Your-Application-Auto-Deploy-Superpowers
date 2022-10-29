@@ -1,17 +1,8 @@
-- name: check dist
-  become: yes
-  shell: |
-    ls
-    
-- name: change directory
-  command:  pm2 start main.js
-  args:
-    chdir: ~/project/backend/dist
 
 - name: Extract foo.tgz into /var/lib/fo
   become: yes
   unarchive:
-    src: files/artifact.tar.gz
+    src: artifact.tar.gz
     dest: .
  
 - name: start app
