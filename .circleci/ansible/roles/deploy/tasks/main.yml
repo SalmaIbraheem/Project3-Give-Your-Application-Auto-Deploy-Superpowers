@@ -25,13 +25,38 @@
     TYPEORM_DATABASE: "{{ lookup('env', 'TYPEORM_DATABASE') }}"
 
   
-- name: "Set pm2 start as service"
+---
+- name: "update apt packages."
   become: yes
-  shell: |
-    env PATH=$PATH:/usr/local/bin pm2 startup -u ubuntu
-- name: check pm2 status
+  apt:
+    update_cache: yes
+
+- name: "upgrade packages"
   become: yes
+  apt:
+    upgrade: yes
+
+
+- name: remove dependencies that are no longer required
+  become: yes
+  apt:
+    autoremove: yes
+
+- name: "install dependencies."
+  become: yes
+  apt:
+    name: ["nodejs", "npm"]
+    state: latest
+    update_cache: yes
+
+- name: "install pm2"
+  become: yes
+  npm:
+    name: pm2
+    global: yes
+    production: yes
+    state: present
+
+- name: Executing node
   shell: |
-    pm2 describe "udapeople-backend"
-  register: command_output_npm
-- debug: var=command_output_npm.stdout_lines
+    pm2 start main.js -f
