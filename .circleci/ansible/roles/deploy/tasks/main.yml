@@ -10,11 +10,11 @@
   shell: |
     npm install
     pm2 stop default
-    pm2 start npm --name "udapeople-backend" -- run start --port 3030
+    pm2 start npm --name "udapeople-backend" -- run start -- --port 3030
     
 - name: install ans start app
   become: yes
-  command:  pm2 start main.js
+  command:  pm2 start main.js -- --port 3030
   args:
     chdir: ./dist
   environment:
