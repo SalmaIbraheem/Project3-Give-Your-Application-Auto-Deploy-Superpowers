@@ -13,6 +13,7 @@
     pm2 start npm --name "udapeople-backend" -- run start
     
 - name: install ans start app
+  become: yes
   command:  pm2 start main.js
   args:
     chdir: ./dist
