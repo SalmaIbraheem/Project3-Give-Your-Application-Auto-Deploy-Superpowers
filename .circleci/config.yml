@@ -324,12 +324,6 @@ jobs:
                 apk add --update curl
                 pip3 install awscli
           - run:
-              name: Get backend url
-              command: |
-                # Fetch and prepare the BACKEND_IP env var
-                export BACKEND_IP=$(aws --region us-west-2 ec2 describe-instances --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" --query 'Reservations[*].Instances[*].PublicDnsName' --output text)
-                export API_URL="http://${BACKEND_IP}:3030"
-          - run:
               name: Frontend smoke test.
               command: |
                 URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-us-east-1.amazonaws.com/#/employees"            
@@ -344,6 +338,9 @@ jobs:
           - run:
               name: Backend smoke test.
               command: |
+                # Fetch and prepare the BACKEND_IP env var
+                export BACKEND_IP=$(aws --region us-west-2 ec2 describe-instances --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" --query 'Reservations[*].Instances[*].PublicDnsName' --output text)
+                export API_URL="http://${BACKEND_IP}:3030"
                 echo "${API_URL}"
                 if curl "${API_URL}/api/status" | grep "ok"
                 then
@@ -353,8 +350,8 @@ jobs:
                 fi
 
           # Here's where you will add some code to rollback on failure  
-          - revert-migrations
-          - destroy-environment
+          #- revert-migrations
+          #- destroy-environment
    
                     
 workflows:
