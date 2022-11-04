@@ -366,7 +366,7 @@ jobs:
           - run:
               name: Update cloudfront distribution
               command: |
-                export OldWorkflowID=$(aws --region us-west-2 cloudformation list-exports --query "Exports[?Name==\`WorkflowID\`].Value" --no-paginate --output text)
+                export OldWorkflowID=$(aws --region us-west-1 cloudformation list-exports --query "Exports[?Name==\`WorkflowID\`].Value" --no-paginate --output text)
                 echo "Old Wokflow ID: $OldWorkflowID"
                 curl https://kvdb.io/${KVDB_BUCKET_ID}/old_workflow_id -d "${OldWorkflowID}"
                 # Change the initial stack name, as applicable to you
@@ -402,9 +402,9 @@ jobs:
               command: |
                 if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
                 then
-                  aws --region us-west-2 s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
-                  aws --region us-west-2 cloudformation delete-stack --stack-name "udapeople-backend-${OldWorkflowID}"
-                  aws --region us-west-2 cloudformation delete-stack --stack-name "udapeople-frontend-${OldWorkflowID}"
+                  aws --region us-west-1 s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
+                  aws --region us-west-1 cloudformation delete-stack --stack-name "udapeople-backend-${OldWorkflowID}"
+                  aws --region us-west-1 cloudformation delete-stack --stack-name "udapeople-frontend-${OldWorkflowID}"
                   echo "=======================Delete Confirmed========================"
                 else
                   echo "=======================Didn't delete========================"            
