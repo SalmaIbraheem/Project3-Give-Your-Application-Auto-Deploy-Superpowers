@@ -1,4 +1,12 @@
+
+[URL01]
+https://github.com/SalmaIbraheem/Project3-Give-Your-Application-Auto-Deploy-Superpowers
+[URL02]
+http://udapeople-2096da4.s3-website-us-east-1.amazonaws.com
 [URL03]
-cloudfront
+http://dx3xux0hxw5dn.cloudfront.net/#/employees/new
 [URL04]
-backend/api/status
+http://ec2-34-229-221-235.compute-1.amazonaws.com:3030/api/status
+[URL05]
+http://ec2-107-21-131-203.compute-1.amazonaws.com:9090/targets
+
