@@ -180,7 +180,7 @@ jobs:
         steps:
           - checkout
           - add_ssh_keys:
-              fingerprints: ["04:74:91:0e:50:f7:c7:68:1a:dc:2c:2f:b2:03:c7:8d"] 
+              fingerprints: ["${CIRCLECI_SSH}"] 
           - attach_workspace:
               at: ~/
           - run:
