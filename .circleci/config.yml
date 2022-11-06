@@ -398,10 +398,7 @@ jobs:
           - run:
               name: Remove old stacks and files
               command: |
-                if [[ $OldWorkflowID == "" ]]
-                then
-                  echo "=======================Didn't delete========================"   
-                elif [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
+                if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
                 then
                   aws --region us-east-1 s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
                   aws --region us-east-1 cloudformation delete-stack --stack-name "udapeople-backend-${OldWorkflowID}"
